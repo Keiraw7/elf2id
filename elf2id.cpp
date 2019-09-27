@@ -52,8 +52,8 @@ bool set_input_file(char *fName);
 bool set_output_file(char *fName);
 
 
-RETURNCODE open_file(char *name, const char *mode, FILE *f);
-RETURNCODE dump_file(FILE *f, uint8_t *dst, uint32_t *size);
+RETURNCODE open_file(char *name, const char *mode, FILE **f);
+RETURNCODE dump_file(FILE *f, uint8_t **dst, uint32_t *size);
 RETURNCODE find_id(uint8_t *src, uint32_t size);
 RETURNCODE file_write(FILE *f, uint8_t *data, uint32_t nbytes);
 
@@ -65,13 +65,13 @@ int main(int argc, char *argv[])
 
 //Open Files
 if(!error)
-    error = open_file(inName, "rb", inFile);
+    error = open_file(inName, "rb", &inFile);
 if(!error)
-    error = open_file(outName, "wb", outFile);
+    error = open_file(outName, "wb", &outFile);
 
 //dump file
 if(!error)
-    error = dump_file(inFile, elfFile, &inSize);
+    error = dump_file(inFile, &elfFile, &inSize);
 
 //find info
 if(!error)
@@ -201,10 +201,10 @@ bool set_output_file(char *fName)
 
 
 //open input file
-RETURNCODE open_file(char *name, const char *mode, FILE *f)
+RETURNCODE open_file(char *name, const char *mode, FILE **f)
 {
-    f = fopen( name, mode);
-    if(!f)
+    *f = fopen( name, mode);
+    if(!*f)
     {
         printf("Error: Unable to open %s\n", name);
         return ERROR_OPEN_FILE;
@@ -212,7 +212,7 @@ RETURNCODE open_file(char *name, const char *mode, FILE *f)
     return NO_ERROR;
 }
 
-RETURNCODE dump_file(FILE *f, uint8_t *dst, uint32_t *size)
+RETURNCODE dump_file(FILE *f, uint8_t **dst, uint32_t *size)
 {
     *size = 0;
 
@@ -227,12 +227,12 @@ RETURNCODE dump_file(FILE *f, uint8_t *dst, uint32_t *size)
     if(*size == 0)
         return ERROR_FILE_SIZE;
     
-    dst = static_cast<uint8_t*> (malloc(*size));
+    *dst = static_cast<uint8_t*> (malloc(*size));
 
-    if(dst == NULL)
+    if(*dst == NULL)
         return ERROR_ALLOCATE_DATA;
 
-    size_t rbytes = fread(static_cast<void *>(dst), 1, *size, f);
+    size_t rbytes = fread(static_cast<void *>(*dst), 1, *size, f);
 
     if(rbytes != *size)
         return ERROR_READ;
@@ -263,15 +263,15 @@ RETURNCODE find_id(uint8_t *src, uint32_t size)
         {
             uint32_t val;
             uint8_t *buf = (uint8_t *) &val;
-            buf[0] = src[i+9];
-            buf[1] = src[i+10];
-            buf[2] = src[i+11];
-            buf[3] = src[i+12];
+            buf[0] = src[i+8];
+            buf[1] = src[i+9];
+            buf[2] = src[i+10];
+            buf[3] = src[i+11];
             fVersion = val;
-            buf[0] = src[i+13];
-            buf[1] = src[i+14];
-            buf[2] = src[i+15];
-            buf[3] = src[i+16];
+            buf[0] = src[i+12];
+            buf[1] = src[i+13];
+            buf[2] = src[i+14];
+            buf[3] = src[i+15];
             fProduct = val;
             break;
         }
