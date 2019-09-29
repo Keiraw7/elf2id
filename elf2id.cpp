@@ -6,6 +6,8 @@
 #include <ctype.h>
 
 
+//-exec type format add --format hex uint32_t
+
 #define BMASK(x)				(1<<(x))
 
 #define REQ_ARG_INPUT           (BMASK(0))
@@ -46,6 +48,8 @@ uint8_t *elfFile = NULL;
 
 uint32_t fVersion = 0xffffffff; 
 uint32_t fProduct = 0xffffffff; 
+
+int test_int = 0x8567;
 
 
 RETURNCODE parse_args(int argc, char* argv[]);
@@ -208,7 +212,7 @@ RETURNCODE open_file(char *name, const char *mode, FILE **f)
     if(!*f)
     {
         printf("Error: Unable to open %s\n", name);
-        return ERROR_OPEN_FILE;
+            return ERROR_OPEN_FILE;
     }
     return NO_ERROR;
 }
